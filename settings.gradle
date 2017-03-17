@@ -1,6 +1,6 @@
-rootProject.name = 'ratpack-kotlin'
+rootProject.name = 'kotlin-ratpack'
 
-include 'ratpack-core-kotlin'
+include 'kotlin-ratpack-core'
 
 rootProject.children.each { project ->
   project.buildFileName = "${project.name}.gradle.kts"
