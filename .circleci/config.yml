@@ -15,7 +15,7 @@ jobs:
           name: Gradle Build
           command: ./gradlew build --no-daemon
       - save_cache:
-          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" {% raw %}}}
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts }}
           paths:
             - ~/.gradle/wrapper
             - ~/.gradle/caches
