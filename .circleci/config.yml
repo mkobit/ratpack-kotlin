@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/circulate
+    docker:
+      - image: openjdk:8u121-jdk-alpine
+    steps:
+      - checkout
+      - restore_cache:
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" {% raw %}}}
+      - run:
+        name: Build
+        command: ./gradlew build --no-daemon
+      - save_cache:
+          key: kotlin-ratpack-{{ .Branch }}
+          paths:
+            - ~/.gradle/wrapper
+            - ~/.gradle/caches
+            - ~/.gradle/native
+
+
