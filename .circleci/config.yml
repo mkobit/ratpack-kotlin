@@ -8,9 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" {% raw %}}}
-      - run:
-        name: Build
-        command: ./gradlew build --no-daemon
+      - run: ./gradlew build --no-daemon
       - save_cache:
           key: kotlin-ratpack-{{ .Branch }}
           paths:
