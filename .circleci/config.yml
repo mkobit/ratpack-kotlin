@@ -6,8 +6,8 @@ jobs:
       - image: openjdk:8u121-jdk-alpine
     steps:
       - run:
-          name: Install Git
-          command: apk add --no-cache git
+          name: Install Git and OpenSSH
+          command: apk add --no-cache git openssh
       - checkout
       - restore_cache:
           key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" {% raw %}}}
