@@ -5,14 +5,17 @@ jobs:
     docker:
       - image: openjdk:8u121-jdk-alpine
     steps:
+      - run:
+          name: Install Git and OpenSSH
+          command: apk add --no-cache git openssh
       - checkout
       - restore_cache:
-          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" {% raw %}}}
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
       - run:
-        name: Build
-        command: ./gradlew build --no-daemon
+          name: Gradle Build
+          command: ./gradlew build --no-daemon
       - save_cache:
-          key: kotlin-ratpack-{{ .Branch }}
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
           paths:
             - ~/.gradle/wrapper
             - ~/.gradle/caches
