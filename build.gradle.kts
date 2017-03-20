@@ -37,7 +37,7 @@ buildScan {
     env("CIRCLE_BUILD_URL")?.let { link("Build URL", it) }
     env("CIRCLE_SHA1")?.let { value("Revision", it) }
     env("CIRCLE_COMPARE_URL")?.let { link("Diff", it) }
-    env("CIRCLE_REPOSITORY_URL")?.let { link("Repository", it) }
+    env("CIRCLE_REPOSITORY_URL")?.let { value("Repository", it) }
     env("CIRCLE_PR_NUMBER")?.let { value("Pull Request Number", it) }
   }
 }
