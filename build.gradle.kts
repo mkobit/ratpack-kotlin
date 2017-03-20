@@ -78,8 +78,7 @@ subprojects {
   }
 }
 
-project(":kotlin-ratpack-core") {
-
+project(":ratpack-core-kotlin") {
   dependencies {
     "api"(ratpackModule("core"))
   }
