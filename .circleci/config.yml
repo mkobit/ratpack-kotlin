@@ -1,7 +1,6 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/circulate
     docker:
       - image: openjdk:8u121-jdk-alpine
     steps:
