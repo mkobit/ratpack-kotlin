@@ -30,6 +30,7 @@ buildScan {
 
   // Env variables from https://circleci.com/docs/2.0/env-vars/
   if (env("CI") != null) {
+    logger.lifecycle("Running in CI environment, setting build scan attributes.")
     tag("CI")
     env("CIRCLE_BRANCH")?.let { tag(it) }
     env("CIRCLE_BUILD_NUM")?.let { value("Circle CI Build Number", it) }
@@ -37,7 +38,7 @@ buildScan {
     env("CIRCLE_SHA1")?.let { value("Revision", it) }
     env("CIRCLE_COMPARE_URL")?.let { link("Diff", it) }
     env("CIRCLE_REPOSITORY_URL")?.let { link("Repository", it) }
-    env("CIRCLE_PR_NUMBER")?.let { link("Pull Request Number", it) }
+    env("CIRCLE_PR_NUMBER")?.let { value("Pull Request Number", it) }
   }
 }
 
