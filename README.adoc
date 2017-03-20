@@ -1,0 +1,8 @@
+= Ratpack Kotlin
+:toc:
+:circle-ci-status: image:https://circleci.com/gh/mkobit/ratpack-kotlin/tree/master.svg?style=svg["CircleCI", link="https://circleci.com/gh/mkobit/ratpack-kotlin/tree/master"]
+:ratpack-url: https://github.com/ratpack/ratpack
+
+{circle-ci-status}
+
+This is a set of Kotlin extensions and libraries built on top of link:{ratpack-url}[Ratpack].
