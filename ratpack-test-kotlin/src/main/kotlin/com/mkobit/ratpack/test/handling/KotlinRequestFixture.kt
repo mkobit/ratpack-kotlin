@@ -1,4 +1,4 @@
-package com.mkobit.ratpack.test
+package com.mkobit.ratpack.test.handling
 
 import ratpack.func.Action
 import ratpack.handling.Handler

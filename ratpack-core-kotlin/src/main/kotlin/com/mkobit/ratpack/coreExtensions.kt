@@ -22,6 +22,7 @@ class KotlinRatpackServerSpec(val serverSpecDelegate: RatpackServerSpec): Ratpac
    * Set the configuration of the server.
    */
   fun serverConfig(callback: ServerConfigBuilder.() -> Unit): RatpackServerSpec {
+
     return serverSpecDelegate.serverConfig {
       it.callback()
     }
