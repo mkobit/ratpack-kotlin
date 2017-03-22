@@ -2,6 +2,7 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
 
@@ -124,6 +125,9 @@ subprojects {
     "sourcesJar"(Jar::class) {
       classifier = "sources"
       from(mainSources.allSource)
+    }
+    "wrapper"(Wrapper::class) {
+      gradleVersion = "3.5-rc-1"
     }
   }
 
