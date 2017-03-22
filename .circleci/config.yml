@@ -12,8 +12,8 @@ jobs:
 #      - restore_cache:
 #          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
       - run:
-          name: Gradle Build
-          command: ./gradlew build --no-daemon --scan --stacktrace
+          name: Build
+          command: ./gradlew dokkaJavadocJar sourcesJar build --no-daemon --scan --stacktrace
 #      - save_cache:
 #          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
 #          paths:
