@@ -93,6 +93,8 @@ subprojects {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation(ratpackModule("test"))
     testImplementation("com.google.truth:truth:0.32")
+    testImplementation(kotlinModule("reflect", kotlinVersion))
+    testImplementation("com.nhaarman:mockito-kotlin:1.3.0")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
