@@ -4,10 +4,12 @@ rootProject.buildFileName = 'build.gradle.kts'
 include \
   'ratpack-core-kotlin',
   'ratpack-guice-kotlin',
-  'ratpack-test-kotlin'
+  'ratpack-test-kotlin',
+  'ratpack-example-kotlin'
 
 rootProject.children.each { project ->
   project.buildFileName = "${project.name}.gradle.kts"
   assert project.buildFile.file
   assert project.name.startsWith('ratpack-')
+  assert project.name.endsWith('-kotlin')
 }
