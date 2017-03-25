@@ -1,4 +1,5 @@
 import com.jfrog.bintray.gradle.BintrayExtension
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -22,7 +23,7 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "1.1.1" apply false
   id("com.github.ben-manes.versions") version "0.14.0"
   id("com.jfrog.bintray") version "1.7.3" apply false
-  id("io.ratpack.ratpack-java") version "1.4.5" apply false
+  id("io.ratpack.ratpack-java") apply false
 }
 
 allprojects {
@@ -33,7 +34,6 @@ allprojects {
     jcenter()
   }
 }
-
 
 buildScan {
   fun env(key: String): String? = System.getenv(key)
@@ -63,10 +63,11 @@ var log4jVersion: String by extra
 log4jVersion = "2.8.1"
 var kotlinVersion: String by extra
 kotlinVersion = "1.1.1"
-var ratpackVersion: String by extra
-ratpackVersion = "1.4.5"
 
-fun ratpackModule(artifactName: String): Any = "io.ratpack:ratpack-$artifactName:$ratpackVersion"
+fun ratpackModule(artifactName: String): Dependency {
+  val ratpackVersion: String = project.property("ratpackVersion") as String
+  return dependencies.create("io.ratpack:ratpack-$artifactName:$ratpackVersion")
+}
 
 tasks {
   "wrapper"(Wrapper::class) {

@@ -1,3 +1,13 @@
+pluginManagement {
+  it.resolutionStrategy {
+    it.eachPlugin {
+      if (it.requested.id.id == 'io.ratpack.ratpack-java') {
+        it.useVersion("${ratpackVersion}")
+      }
+    }
+  }
+}
+
 rootProject.name = 'ratpack-kotlin'
 rootProject.buildFileName = 'build.gradle.kts'
 
