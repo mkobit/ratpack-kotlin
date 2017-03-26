@@ -6,6 +6,9 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.junit.platform.gradle.plugin.EnginesExtension
+import org.junit.platform.gradle.plugin.FiltersExtension
+import org.junit.platform.gradle.plugin.JUnitPlatformExtension
 
 buildscript {
   repositories {
@@ -107,6 +110,14 @@ subprojects {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
     testRuntimeOnly("org.apache.logging.log4j:log4j-jul:$log4jVersion")
+  }
+
+  configure<JUnitPlatformExtension> {
+    filters {
+      engines {
+        include("junit-platform")
+      }
+    }
   }
 
   tasks {
@@ -212,5 +223,19 @@ afterEvaluate {
     if (ignoredBuild.isEmpty()) {
       throw GradleException("Subproject ${subproject.name} does not contain an entry 'build/'")
     }
+  }
+}
+
+
+fun JUnitPlatformExtension.filters(setup: FiltersExtension.() -> Unit) {
+  when (this) {
+    is ExtensionAware -> extensions.getByType(FiltersExtension::class.java).setup()
+    else -> throw Exception("${this::class} must be an instance of ExtensionAware")
+  }
+}
+fun FiltersExtension.engines(setup: EnginesExtension.() -> Unit) {
+  when (this) {
+    is ExtensionAware -> extensions.getByType(EnginesExtension::class.java).setup()
+    else -> throw Exception("${this::class} must be an instance of ExtensionAware")
   }
 }
