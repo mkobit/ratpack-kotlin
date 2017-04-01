@@ -9,16 +9,12 @@ jobs:
           name: Install Git and OpenSSH
           command: apk add --no-cache git openssh
       - checkout
-#      - restore_cache:
-#          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
+      - restore_cache:
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
       - run:
           name: Build
           command: ./gradlew dokkaJavadocJar sourcesJar build --no-daemon --scan --stacktrace
-#      - save_cache:
-#          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
-#          paths:
-#            - ~/.gradle/wrapper
-#            - ~/.gradle/caches
-#            - ~/.gradle/native
-
-
+      - save_cache:
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
+          paths:
+            - ~/.gradle
