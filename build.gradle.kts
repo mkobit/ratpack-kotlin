@@ -9,6 +9,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.junit.platform.gradle.plugin.EnginesExtension
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
+import java.io.ByteArrayOutputStream
 
 buildscript {
   repositories {
@@ -28,6 +29,8 @@ plugins {
   id("com.jfrog.bintray") version "1.7.3" apply false
   id("io.ratpack.ratpack-java") apply false
 }
+
+applyFrom("gradle/gitignore.gradle.kts")
 
 allprojects {
   group = "com.mkobit.ratpack"
@@ -74,7 +77,7 @@ fun ratpackModule(artifactName: String): Dependency {
 
 tasks {
   "wrapper"(Wrapper::class) {
-    gradleVersion = "3.5-rc-1"
+    gradleVersion = "3.5-rc-2"
   }
 }
 
@@ -83,6 +86,16 @@ val publishedProjects: Set<String> = setOf(
     "ratpack-test-kotlin",
     "ratpack-guice-kotlin"
 )
+
+val revision: String by lazy {
+  val stream = ByteArrayOutputStream()
+  exec {
+    commandLine("git", "log", "--format=%H", "-n", "1", "HEAD")
+    workingDir(rootDir)
+    standardOutput = stream
+  }.rethrowFailure().assertNormalExitValue()
+  stream.toByteArray().toString(Charsets.UTF_8).trim()
+}
 
 subprojects {
   apply {
@@ -113,6 +126,7 @@ subprojects {
   }
 
   configure<JUnitPlatformExtension> {
+    platformVersion = junitPlatformVersion
     filters {
       engines {
         include("junit-platform")
@@ -120,16 +134,9 @@ subprojects {
     }
   }
 
-  tasks {
-    "jar"(Jar::class) {
-      manifest {
-        attributes(mapOf(
-            "Implementation-Version" to version
-        ))
-      }
-    }
 
-    val dokkaJavadoc = "dokkaJavadoc"(DokkaTask::class) {
+  tasks {
+    val dokkaJavadoc: DokkaTask by creating(DokkaTask::class) {
       outputFormat = "javadoc"
       outputDirectory = "$buildDir/javadoc"
     }
@@ -146,7 +153,16 @@ subprojects {
       classifier = "sources"
       from(mainSources.allSource)
     }
+    withType(Jar::class.java) {
+      manifest {
+        attributes(mapOf(
+            "Implementation-Version" to version,
+            "Build-Revision" to revision
+        ))
+      }
+    }
   }
+
 
   if (name in publishedProjects) {
     apply {
@@ -210,22 +226,6 @@ project(":ratpack-example-kotlin") {
     testImplementation(project(":ratpack-test-kotlin"))
   }
 }
-
-afterEvaluate {
-  subprojects.forEach { subproject ->
-    val gitignore: File = subproject.projectDir.resolve(".gitignore")
-
-    if (!gitignore.isFile) {
-      throw GradleException("Subproject ${subproject.name} must have a .gitignore file")
-    }
-    val ignoredBuild = gitignore.readLines(Charsets.UTF_8).filter { it.contentEquals("build/") }
-
-    if (ignoredBuild.isEmpty()) {
-      throw GradleException("Subproject ${subproject.name} does not contain an entry 'build/'")
-    }
-  }
-}
-
 
 fun JUnitPlatformExtension.filters(setup: FiltersExtension.() -> Unit) {
   when (this) {
