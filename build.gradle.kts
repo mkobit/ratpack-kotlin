@@ -18,7 +18,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("org.junit.platform:junit-platform-gradle-plugin:1.0.0-M3")
+    classpath("org.junit.platform:junit-platform-gradle-plugin:1.0.0-M4")
     classpath("org.jetbrains.dokka:dokka-gradle-plugin:0.9.13")
   }
 }
@@ -63,9 +63,9 @@ buildScan {
 }
 
 var junitPlatformVersion: String by extra
-junitPlatformVersion = "1.0.0-M3"
+junitPlatformVersion = "1.0.0-M4"
 var junitJupiterVersion: String by extra
-junitJupiterVersion = "5.0.0-M3"
+junitJupiterVersion = "5.0.0-M4"
 var log4jVersion: String by extra
 log4jVersion = "2.8.1"
 var kotlinVersion: String by extra
