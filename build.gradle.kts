@@ -6,6 +6,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.junit.platform.gradle.plugin.EnginesExtension
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
@@ -160,6 +161,9 @@ subprojects {
             "Build-Revision" to revision
         ))
       }
+    }
+    withType(KotlinCompile::class.java) {
+      kotlinOptions.jvmTarget = "1.8"
     }
   }
 
