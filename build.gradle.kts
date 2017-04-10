@@ -7,6 +7,7 @@ import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.junit.platform.console.options.Details
 import org.junit.platform.gradle.plugin.EnginesExtension
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
@@ -78,7 +79,7 @@ fun ratpackModule(artifactName: String): Dependency {
 
 tasks {
   "wrapper"(Wrapper::class) {
-    gradleVersion = "3.5-rc-2"
+    gradleVersion = "3.5-rc-3"
   }
 }
 
@@ -98,6 +99,18 @@ val revision: String by lazy {
   stream.toByteArray().toString(Charsets.UTF_8).trim()
 }
 
+val tagRevision by tasks.creating {
+  description = "Pushes a Git tag of the current project version back to Git"
+  doLast {
+    exec {
+      commandLine("git", "tag", version)
+    }.assertNormalExitValue().rethrowFailure()
+    exec {
+      commandLine("git", "push", "origin", "refs/tags/$version")
+    }
+  }
+}
+
 subprojects {
   apply {
     plugin("org.jetbrains.kotlin.jvm")
@@ -114,36 +127,41 @@ subprojects {
 
   dependencies {
     "api"(kotlinModule("stdlib-jre8", kotlinVersion))
+    "api"("io.ratpack:ratpack-core:1.4.5")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation(ratpackModule("test"))
     testImplementation("com.google.truth:truth:0.32")
     testImplementation(kotlinModule("reflect", kotlinVersion))
-    testImplementation("com.nhaarman:mockito-kotlin:1.3.0")
+    testImplementation("com.nhaarman:mockito-kotlin:1.4.0")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
     testRuntimeOnly("org.apache.logging.log4j:log4j-jul:$log4jVersion")
   }
 
   configure<JUnitPlatformExtension> {
     platformVersion = junitPlatformVersion
+    // Uncomment after https://github.com/junit-team/junit5/issues/786 is released in M5
+//    details = Details.TREE
     filters {
       engines {
-        include("junit-platform")
+        include("junit-jupiter")
       }
     }
   }
 
-
   tasks {
     val dokkaJavadoc: DokkaTask by creating(DokkaTask::class) {
+      description = "Generates the Javadoc using Dokka"
       outputFormat = "javadoc"
       outputDirectory = "$buildDir/javadoc"
     }
 
     "dokkaJavadocJar"(Jar::class) {
       dependsOn(dokkaJavadoc)
+      description = "Creates a JAR of the Javadoc"
       classifier = "javadoc"
       from(dokkaJavadoc.outputDirectory)
     }
@@ -151,6 +169,7 @@ subprojects {
     val mainSources = convention.getPlugin(JavaPluginConvention::class).sourceSets["main"]
 
     "sourcesJar"(Jar::class) {
+      description = "Creates a JAR of the source code"
       classifier = "sources"
       from(mainSources.allSource)
     }
@@ -172,24 +191,47 @@ subprojects {
     apply {
       plugin("maven-publish")
     }
-    logger.lifecycle("Applying Bintray publishing configuration to ${this@subprojects.path}")
-    configure<BintrayExtension> {
-      user = project.findProperty("bintrayUser") as String?
-      key = project.findProperty("bintrayKey") as String?
-      pkg(closureOf<BintrayExtension.PackageConfig> {
-        setLicenses("Apache-2.0")
-        repo = this@subprojects.name
-        issueTrackerUrl = "https://github.com/mkobit/ratpack-kotlin/issues"
-        vcsUrl = "https://github.com/mkobit/ratpack-kotlin"
-        setLabels("kotlin", "ratpack")
-      })
-    }
+    logger.lifecycle("Applying Bintray publishing configuration to $path")
 
     configure<PublishingExtension> {
       publications.create<MavenPublication>("mavenJava") {
         from(components["java"])
         artifact(tasks["dokkaJavadocJar"])
         artifact(tasks["sourcesJar"])
+        version = rootProject.version as String
+        group = rootProject.group as String
+        artifactId = this@subprojects.name
+      }
+    }
+
+    configure<BintrayExtension> {
+      user = if (project.hasProperty("bintrayUser")) {
+        project.property("bintrayUser") as String
+      } else {
+        System.getenv("BINTRAY_USER")
+      }
+      key = if (project.hasProperty("bintrayKey")) {
+        project.property("bintrayKey") as String
+      } else {
+        System.getenv("BINTRAY_API_KEY")
+      }
+      setPublications("mavenJava")
+      pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+        version(delegateClosureOf<BintrayExtension.VersionConfig> {
+          name = rootProject.version as String
+        })
+        setLicenses("Apache-2.0")
+        repo = "ratpack-kotlin"
+        name = this@subprojects.name
+        issueTrackerUrl = "https://github.com/mkobit/ratpack-kotlin/issues"
+        vcsUrl = "https://github.com/mkobit/ratpack-kotlin"
+        setLabels("kotlin", "ratpack")
+      })
+    }
+
+    tasks.whenTaskAdded {
+      if (name == "bintrayPublish") {
+        finalizedBy(tagRevision)
       }
     }
   }
