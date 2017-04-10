@@ -8,7 +8,7 @@ import ratpack.server.ServerConfigBuilder
  * Wrapper class that delegates to the [RatpackServerSpec].
  * @param delegate the server spec delegate
  */
-class KotlinRatpackServerSpec(val delegate: RatpackServerSpec): RatpackServerSpec by delegate {
+class KotlinRatpackServerSpec(val delegate: RatpackServerSpec) {
   /**
    * Set the configuration of the server.
    */

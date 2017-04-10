@@ -47,7 +47,6 @@ class ObjectNodeBuilder(
     rawNode.set(this, null)
   }
 
-
   fun objectNode(configuration: ObjectNodeBuilder.() -> Unit): ObjectNode {
     val innerBuilder: ObjectNodeBuilder = ObjectNodeBuilder(jsonNodeFactory, jsonNodeFactory.objectNode())
     innerBuilder.configuration()
