@@ -3,8 +3,11 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.wrapper.Wrapper
 import org.gradle.jvm.tasks.Jar
+import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.junit.platform.console.options.Details
@@ -71,6 +74,8 @@ var log4jVersion: String by extra
 log4jVersion = "2.8.1"
 var kotlinVersion: String by extra
 kotlinVersion = "1.1.1"
+var jacocoVersion: String by extra
+jacocoVersion = "0.7.9"
 
 fun ratpackModule(artifactName: String): Dependency {
   val ratpackVersion: String = project.property("ratpackVersion") as String
@@ -118,6 +123,7 @@ subprojects {
     plugin("org.junit.platform.gradle.plugin")
     plugin("com.jfrog.bintray")
     plugin("org.jetbrains.dokka")
+    plugin("jacoco")
   }
 
   convention.getPlugin(JavaPluginConvention::class.java).apply {
@@ -151,6 +157,8 @@ subprojects {
       }
     }
   }
+
+  val java = the<JavaPluginConvention>()
 
   tasks {
     val dokkaJavadoc: DokkaTask by creating(DokkaTask::class) {
@@ -186,6 +194,23 @@ subprojects {
     }
   }
 
+  // Apply code coverage
+  // See https://stackoverflow.com/questions/39362955/gradle-jacoco-and-junit5
+  tasks.whenTaskAdded {
+    if (name == "junitPlatformTest") {
+      configure<JacocoPluginExtension> {
+        toolVersion = jacocoVersion
+        applyTo(this@whenTaskAdded as JavaExec)
+      }
+      tasks.create("${name}JacocoReport", JacocoReport::class.java) {
+        val main = java.sourceSets["main"]!!
+        sourceSets(main)
+        executionData(this@whenTaskAdded)
+        sourceDirectories = main.allSource
+        classDirectories = main.output
+      }
+    }
+  }
 
   if (name in publishedProjects) {
     apply {
