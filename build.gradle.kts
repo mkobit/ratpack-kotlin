@@ -1,5 +1,4 @@
 import com.jfrog.bintray.gradle.BintrayExtension
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -93,7 +92,7 @@ fun Project.propertyOrEnv(propertyName: String, envName: String): String? =
 
 tasks {
   "wrapper"(Wrapper::class) {
-    gradleVersion = "3.5-rc-3"
+    gradleVersion = "3.5"
   }
 }
 
