@@ -10,11 +10,9 @@ import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.junit.platform.console.options.Details
 import org.junit.platform.gradle.plugin.EnginesExtension
 import org.junit.platform.gradle.plugin.FiltersExtension
 import org.junit.platform.gradle.plugin.JUnitPlatformExtension
-import java.io.ByteArrayOutputStream
 
 buildscript {
   repositories {
@@ -87,10 +85,11 @@ val ratpackVersion: String = project.property("ratpackVersion") as String
 fun Project.propertyOrEnv(propertyName: String, envName: String): String? =
     this.findProperty(propertyName) as String? ?: System.getenv(envName)
 
-fun ratpackModule(artifactName: String): Dependency {
-  val ratpackVersion: String = project.property("ratpackVersion") as String
-  return dependencies.create("io.ratpack:ratpack-$artifactName:$ratpackVersion")
-}
+// TODO: figure out why this causes GSK compilation problems
+//fun DependencyHandler.ratpackModule(artifactName: String): Dependency {
+//  val ratpackVersion: String = project.property("ratpackVersion") as String
+//  return this.create("io.ratpack:ratpack-$artifactName:$ratpackVersion")
+//}
 
 tasks {
   "wrapper"(Wrapper::class) {
@@ -123,10 +122,10 @@ subprojects {
 
   dependencies {
     "api"(kotlinModule("stdlib-jre8", kotlinVersion))
-    "api"("io.ratpack:ratpack-core:1.4.5")
+    "api"("io.ratpack:ratpack-core:$ratpackVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testImplementation(ratpackModule("test"))
+    testImplementation("io.ratpack:ratpack-test:$ratpackVersion")
     testImplementation("com.google.truth:truth:0.32")
     testImplementation(kotlinModule("reflect", kotlinVersion))
     testImplementation("com.nhaarman:mockito-kotlin:1.4.0")
@@ -247,7 +246,7 @@ subprojects {
 
 project(":ratpack-core-kotlin") {
   dependencies {
-    "api"(ratpackModule("core"))
+    "api"("io.ratpack:ratpack-core:$ratpackVersion")
   }
 }
 
@@ -256,14 +255,14 @@ val core = project(":ratpack-core-kotlin")
 project(":ratpack-guice-kotlin") {
   dependencies {
     "api"(core)
-    "api"(ratpackModule("guice"))
+    "api"("io.ratpack:ratpack-guice:$ratpackVersion")
   }
 }
 
 project(":ratpack-test-kotlin") {
   dependencies {
     "api"(core)
-    "api"(ratpackModule("test"))
+    "api"("io.ratpack:ratpack-test:$ratpackVersion")
   }
 }
 
@@ -277,6 +276,9 @@ project(":ratpack-example-kotlin") {
   dependencies {
     implementation(core)
     implementation(project(":ratpack-guice-kotlin"))
+    runtimeOnly("org.apache.logging.log4j", "log4j-api", log4jVersion)
+    runtimeOnly("org.apache.logging.log4j", "log4j-core", log4jVersion)
+    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", log4jVersion)
     testImplementation(project(":ratpack-test-kotlin"))
   }
 }
