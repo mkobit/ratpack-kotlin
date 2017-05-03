@@ -37,9 +37,14 @@ plugins {
 
 applyFrom("gradle/gitignore.gradle.kts")
 
+version = "0.1.x"
+// Apply this right after version line so version calculation gets applied to all projects
+apply {
+  plugin<versioning.git.VersioningPlugin>()
+}
+
 allprojects {
   group = "com.mkobit.ratpack"
-  version = "0.1.0"
 
   repositories {
     jcenter()
@@ -66,6 +71,8 @@ buildScan {
   }
 }
 
+val revision: String by extra
+
 var junitPlatformVersion: String by extra
 junitPlatformVersion = "1.0.0-M4"
 var junitJupiterVersion: String by extra
@@ -76,6 +83,9 @@ var kotlinVersion: String by extra
 kotlinVersion = "1.1.1"
 var jacocoVersion: String by extra
 jacocoVersion = "0.7.9"
+val ratpackVersion: String = project.property("ratpackVersion") as String
+fun Project.propertyOrEnv(propertyName: String, envName: String): String? =
+    this.findProperty(propertyName) as String? ?: System.getenv(envName)
 
 fun ratpackModule(artifactName: String): Dependency {
   val ratpackVersion: String = project.property("ratpackVersion") as String
@@ -94,27 +104,7 @@ val publishedProjects: Set<String> = setOf(
     "ratpack-guice-kotlin"
 )
 
-val revision: String by lazy {
-  val stream = ByteArrayOutputStream()
-  exec {
-    commandLine("git", "log", "--format=%H", "-n", "1", "HEAD")
-    workingDir(rootDir)
-    standardOutput = stream
-  }.rethrowFailure().assertNormalExitValue()
-  stream.toByteArray().toString(Charsets.UTF_8).trim()
-}
-
-val tagRevision by tasks.creating {
-  description = "Pushes a Git tag of the current project version back to Git"
-  doLast {
-    exec {
-      commandLine("git", "tag", version)
-    }.assertNormalExitValue().rethrowFailure()
-    exec {
-      commandLine("git", "push", "origin", "refs/tags/$version")
-    }
-  }
-}
+val pushVersionTag by tasks
 
 subprojects {
   apply {
@@ -196,6 +186,7 @@ subprojects {
 
   // Apply code coverage
   // See https://stackoverflow.com/questions/39362955/gradle-jacoco-and-junit5
+  // TODO: When M5 released, remove the 'whenTaskAdded' block
   tasks.whenTaskAdded {
     if (name == "junitPlatformTest") {
       configure<JacocoPluginExtension> {
@@ -230,20 +221,12 @@ subprojects {
     }
 
     configure<BintrayExtension> {
-      user = if (project.hasProperty("bintrayUser")) {
-        project.property("bintrayUser") as String
-      } else {
-        System.getenv("BINTRAY_USER")
-      }
-      key = if (project.hasProperty("bintrayKey")) {
-        project.property("bintrayKey") as String
-      } else {
-        System.getenv("BINTRAY_API_KEY")
-      }
+      user = project.propertyOrEnv("bintrayUser", "BINTRAY_USER")
+      key = project.propertyOrEnv("bintrayKey", "BINTRAY_API_KEY")
       setPublications("mavenJava")
       pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
         version(delegateClosureOf<BintrayExtension.VersionConfig> {
-          name = rootProject.version as String
+          name = project.version as String
         })
         setLicenses("Apache-2.0")
         repo = "ratpack-kotlin"
@@ -256,7 +239,7 @@ subprojects {
 
     tasks.whenTaskAdded {
       if (name == "bintrayPublish") {
-        finalizedBy(tagRevision)
+        finalizedBy(pushVersionTag)
       }
     }
   }

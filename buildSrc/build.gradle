@@ -1,0 +1,10 @@
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile("com.squareup.okhttp3:okhttp:3.6.0")
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
