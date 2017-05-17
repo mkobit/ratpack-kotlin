@@ -25,8 +25,8 @@ buildscript {
 }
 
 plugins {
-  id("com.gradle.build-scan") version "1.6"
-  id("org.jetbrains.kotlin.jvm") version "1.1.1" apply false
+  id("com.gradle.build-scan") version "1.7.2"
+  id("org.jetbrains.kotlin.jvm") apply false
   id("com.github.ben-manes.versions") version "0.14.0"
   id("com.jfrog.bintray") version "1.7.3" apply false
   id("io.ratpack.ratpack-java") apply false
@@ -75,9 +75,8 @@ junitPlatformVersion = "1.0.0-M4"
 var junitJupiterVersion: String by extra
 junitJupiterVersion = "5.0.0-M4"
 var log4jVersion: String by extra
-log4jVersion = "2.8.1"
-var kotlinVersion: String by extra
-kotlinVersion = "1.1.1"
+log4jVersion = "2.8.2"
+val kotlinVersion: String = project.property("kotlinVersion") as String
 var jacocoVersion: String by extra
 jacocoVersion = "0.7.9"
 val ratpackVersion: String = project.property("ratpackVersion") as String

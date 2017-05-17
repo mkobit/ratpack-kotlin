@@ -4,6 +4,9 @@ pluginManagement {
       if (it.requested.id.id == 'io.ratpack.ratpack-java') {
         it.useVersion("${ratpackVersion}")
       }
+      if (it.requested.id.id == 'org.jetbrains.kotlin.jvm') {
+        it.useVersion("${kotlinVersion}")
+      }
     }
   }
 }
