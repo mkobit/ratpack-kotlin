@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/ratpack-kotlin
     docker:
-      - image: openjdk:8u131-jdk-alpine
+      - image: openjdk:8u121-jdk-alpine
     steps:
       - run:
           name: Install Git and OpenSSH
