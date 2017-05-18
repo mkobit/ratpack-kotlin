@@ -3,14 +3,14 @@ jobs:
   build:
     working_directory: ~/ratpack-kotlin
     docker:
-      - image: openjdk:8u121-jdk-alpine
+      - image: openjdk:8u131-jdk-alpine
     steps:
       - run:
           name: Install Git and OpenSSH
           command: apk add --no-cache git openssh
       - checkout
       - restore_cache:
-          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}
+          key: kotlin-ratpack-{{ .Branch }}-{{ checksum "build.gradle.kts" }}-{{ checksum "gradle.properties" }}
       - run:
           name: Build
           command: ./gradlew dokkaJavadocJar sourcesJar build --no-daemon --scan --stacktrace
